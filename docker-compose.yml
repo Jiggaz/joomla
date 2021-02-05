@@ -4,8 +4,8 @@ services:
     image: 'docker.io/bitnami/mariadb:10.3-debian-10'
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      - MARIADB_USER=${MARIADB_USER}
-      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_DATABASE=${DB_DATABASE}
     volumes:
       - '${DATA_PATH_HOST}:/bitnami/mariadb'
   joomla:
@@ -16,8 +16,8 @@ services:
     environment:
       - JOOMLA_DATABASE_HOST=mariadb
       - JOOMLA_DATABASE_PORT_NUMBER=3306
-      - JOOMLA_DATABASE_USER=${MARIADB_USER}
-      - JOOMLA_DATABASE_NAME=${MARIADB_DATABASE}
+      - JOOMLA_DATABASE_USER=${DB_USER}
+      - JOOMLA_DATABASE_NAME=${DB_DATABASE}
       - ALLOW_EMPTY_PASSWORD=yes
     volumes:
       - '${APP_CODE_PATH_HOST}:/bitnami/joomla'
