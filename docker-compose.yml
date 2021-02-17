@@ -5,7 +5,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - MARIADB_USER=${DB_USER}
-      - MARIADB_DATABASE=${DB_DATABASE}
+      - MARIADB_DATABASE=${DB_NAME}
     volumes:
       - '${DATA_PATH_HOST}:/bitnami/mariadb'
   joomla:
@@ -17,7 +17,7 @@ services:
       - JOOMLA_DATABASE_HOST=mariadb
       - JOOMLA_DATABASE_PORT_NUMBER=3306
       - JOOMLA_DATABASE_USER=${DB_USER}
-      - JOOMLA_DATABASE_NAME=${DB_DATABASE}
+      - JOOMLA_DATABASE_NAME=${DB_NAME}
       - ALLOW_EMPTY_PASSWORD=yes
     volumes:
       - '${APP_CODE_PATH_HOST}:/bitnami/joomla'
