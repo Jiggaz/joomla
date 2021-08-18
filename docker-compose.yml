@@ -1,7 +1,8 @@
 version: "3"
 services:
   mariadb:
-    image: 'docker.io/bitnami/mariadb:10.3-debian-10'
+    build: 
+      context: './mariadb'
     environment:
       - 'ALLOW_EMPTY_PASSWORD=yes'
       - 'MARIADB_USER=${DB_USER}'
@@ -9,7 +10,8 @@ services:
     volumes:
       - '${DATA_PATH_HOST}:/bitnami/mariadb'
   joomla:
-    image: 'docker.io/bitnami/joomla:3-debian-10'
+    build: 
+      context: './joomla'
     ports:
       - '${JOOMLA_HTTP_PORT}:8080'
       - '${JOOMLA_HTTPS_PORT}:8443'
