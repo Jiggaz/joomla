@@ -9,7 +9,7 @@ user:
       select
     values:
       - 7.4
-      - 8.0
+      - "8.0"
     target:
       PHP_VERSION
 
@@ -66,5 +66,6 @@ system:
   ports:
     http:
       JOOMLA_HTTP_PORT
-    other:
-      PMA_PORT
+    others:
+      - MYSQL_PORT
+      - PMA_PORT
