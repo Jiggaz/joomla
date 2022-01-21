@@ -1,30 +1,34 @@
 #User defined
 user:
-  # php_version:
-  #   label:
-  #     PHP version
-  #   hint:
-  #     Select a PHP version from the list above
-  #   type:
-  #     select
-  #   values:
-  #     - 7.0
-  #     - 7.1
-  #     - 7.2
-  #     - 7.3
-  #     - 7.4
-  #   target:
-  #     PHP_VERSION
+  php_version:
+    label:
+      PHP version
+    hint:
+      Select a PHP version from the list above
+    type:
+      select
+    values:
+      - 7.4
+      - 8.0
+    target:
+      PHP_VERSION
 
-  # install_xdebug:
-  #   label:
-  #     Install XDEBUG?
-  #   type:
-  #     checkbox
-  #   hint:
-  #     Check to enable XDEBUG installation
-  #   target:
-  #     INSTALL_XDEBUG
+  php_error_reporting:
+    label:
+      Enable PHP error reporting?
+    type:
+      checkbox
+    hint: Check the box to display PHP errors 
+    target:
+      DISPLAY_PHPERROR
+  php_xdebug:
+    label:
+      Enable PHP extension XDEBUG?
+    type:
+      checkbox
+    hint: Check the box to display extension xdebug
+    target:
+      XDEBUG
   # mysql_version:
   #   label:
   #     MySQL version
@@ -56,9 +60,11 @@ system:
     true
   #For collecting and storing DB in .env
   #db/user/password
-  # db_credentials:
-  #   true
+  db_credentials:
+    true
   #Generate public ports for the docker image
   ports:
     http:
       JOOMLA_HTTP_PORT
+    other:
+      PMA_PORT

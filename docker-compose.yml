@@ -1,32 +1,41 @@
-version: "3"
+version: '3'
 services:
-  mariadb:
-    build: 
-      context: './mariadb'
-    environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
-      - 'MARIADB_USER=${DB_USER}'
-      - 'MARIADB_DATABASE=${DB_NAME}'
-    volumes:
-      - '${DATA_PATH_HOST}:/bitnami/mariadb'
   joomla:
-    build: 
-      context: './joomla'
-    ports:
-      - '${JOOMLA_HTTP_PORT}:8080'
-      - '${JOOMLA_HTTPS_PORT}:8443'
-    environment:
-      - 'JOOMLA_DATABASE_HOST=mariadb'
-      - 'JOOMLA_DATABASE_PORT_NUMBER=3306'
-      - 'JOOMLA_DATABASE_USER=${DB_USER}'
-      - 'JOOMLA_DATABASE_NAME=${DB_NAME}'
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+    build:
+      context: '${BACK_END}'
+      dockerfile: 'Dockerfile-${PHP_VERSION}'
+      args:
+        - 'BACK_END=${BACK_END}'
+        - 'PHP_VERSION=${PHP_VERSION}'
+        - 'DISPLAY_PHPERROR=${DISPLAY_PHPERROR}'
+        - 'XDEBUG=${XDEBUG}'
+        - 'JOOMLA_VERSION=${JOOMLA_VERSION}'
+        - 'JOOMLA_DB_HOST=${JOOMLA_DB_HOST}'
+        - 'JOOMLA_DB_USER=${DB_USER}'
+        - 'JOOMLA_DB_PASSWORD=${DB_PASSWORD}'
+        - 'JOOMLA_DB_NAME=${DB_NAME}'
     volumes:
-      - '${APP_CODE_PATH_HOST}:/bitnami/joomla'
-    depends_on:
-      - mariadb
-volumes:
-  mariadb_data:
-    driver: local
-  joomla_data:
-    driver: local
+      - '${APP_CODE_PATH_HOST}:${APP_CODE_PATH_JOOMLA}${APP_CODE_CONTAINER_FLAG}'
+    ports:
+      - '${JOOMLA_HOST_HTTP_PORT}:80'
+  mariadb:
+    image: 'mariadb:10.6'
+    environment:
+      - 'MARIADB_DATABASE=${DB_NAME}'
+      - 'MARIADB_USER=${DB_USER}'
+      - 'MARIADB_PASSWORD=${DB_PASSWORD}'
+      - 'MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}'
+    volumes:
+      - '${DATA_PATH_HOST}:/var/lib/mysql'
+    ports:
+      - ${MYSQL_PORT}:3306
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      - 'PMA_ARBITRARY=1'
+      - 'MYSQL_USER=${DB_USER}'
+      - 'MYSQL_PASSWORD=${DB_PASSWORD}'
+      - 'MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}'
+    ports:
+      - '${PMA_PORT}:80'
+volumes: {}

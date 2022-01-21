@@ -1,0 +1,69 @@
+FROM ghcr.io/deck-app/apache:v7.4
+LABEL maintainer Naba Das <hello@get-deck.com>
+
+ENV JOOMLA_INSTALLATION_DISABLE_LOCALHOST_CHECK=1
+# Persistent runtime dependencies
+# Example RUN apk add --no-cache php7-openssl php7-sysvmsg php7-curl
+RUN apk add --no-cache rsync bzip2-dev gmp-dev icu-dev libjpeg-turbo-dev libmemcached-dev libpng-dev libzip-dev openldap-dev pcre-dev postgresql-dev php7-gd php7-ldap php7-gmp php7-intl php7-pecl-mcrypt php7-pdo_mysql php7-pdo_pgsql php7-pgsql
+
+
+RUN mkdir -p /app
+RUN mkdir -p /var/preview
+COPY httpd.conf /etc/apache2/httpd.conf
+COPY httpd.conf /app/httpd.conf
+RUN wget -O /var/preview/index.html https://raw.githubusercontent.com/deck-app/stack-preview-screen/main/install/index.html
+RUN sed -i "s#{SERVER_ROOT}#/var/preview#g" /etc/apache2/httpd.conf
+RUN sed -i "s#{SERVER_ROOT}#/var/www/#g" /app/httpd.conf
+
+WORKDIR /var/www
+
+COPY php_ini/php.ini /etc/php7/php.ini
+ARG DISPLAY_PHPERROR
+RUN if [ ${DISPLAY_PHPERROR} = true ]; then \
+sed -i "s#{DISPLAY}#On#g" /etc/php7/php.ini \
+;else \
+sed -i "s#{DISPLAY}#Off#g" /etc/php7/php.ini \
+;fi
+
+#Xdebug enable or disable
+ARG XDEBUG
+RUN if [ ${XDEBUG} = true ]; then \
+apk add php7-pecl-xdebug \
+&& echo "zend_extension=xdebug" >> /etc/php7/php.ini \
+;fi
+
+RUN apk add php7-zip openssh mercurial tzdata openntpd
+RUN apk add zip apache2 apache2-utils
+RUN apk add php7-zip php7-pecl-mcrypt php7-pecl-apcu php7-pecl-memcached php7-pecl-redis
+RUN apk add zip tar
+ARG LARAVEL_VERSION
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+# Download package and extract to web volume
+
+ARG JOOMLA_VERSION
+
+RUN set -ex; \
+	curl -o joomla.tar.bz2 -SL https://github.com/joomla/joomla-cms/releases/download/${JOOMLA_VERSION}/Joomla_${JOOMLA_VERSION}-Stable-Full_Package.tar.bz2; \
+	mkdir -p /usr/src/joomla; \
+	tar -xf joomla.tar.bz2 -C /usr/src/joomla; \
+	rm joomla.tar.bz2; \
+	chown -R apache:apache /usr/src/joomla
+
+RUN sed -i 's/^if \[\[ "$1" == apache.*$/if \[ true \]; then/' /docker-entrypoint.sh
+ARG JOOMLA_DB_HOST
+ARG JOOMLA_DB_USER
+ARG JOOMLA_DB_NAME
+ARG JOOMLA_DB_PASSWORD
+ENV MYSQL_PORT_3306_TCP=3306
+ENV JOOMLA_DB_HOST=mariadb
+RUN sed -i "s#{JOOMLA_DB_HOST}#${JOOMLA_DB_HOST}#g" /docker-entrypoint.sh
+RUN sed -i "s#{JOOMLA_DB_USER}#${JOOMLA_DB_USER}#g" /docker-entrypoint.sh
+RUN sed -i "s#{JOOMLA_DB_NAME}#${JOOMLA_DB_NAME}#g" /docker-entrypoint.sh
+RUN sed -i "s#{JOOMLA_DB_PASSWORD}#${JOOMLA_DB_PASSWORD}#g" /docker-entrypoint.sh
+RUN sed -i "s#{MYSQL_PORT_3306_TCP}#${MYSQL_PORT_3306_TCP}#g" /docker-entrypoint.sh
+RUN sed -i "s#{JOOMLA_DB_HOST}#${JOOMLA_DB_HOST}#g" /docker-entrypoint.sh
+
+COPY makedb.php /makedb.php
+RUN chmod +x /docker-entrypoint.sh
+RUN chmod +x /makedb.php
+CMD /docker-entrypoint.sh & /sbin/runit-wrapper
