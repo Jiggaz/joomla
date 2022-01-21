@@ -28,9 +28,9 @@ jobs:
 
       - uses: actions/checkout@v2
       - name: Build Container image Backend nginx php 8.0
-        run: docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x --build-arg PHP_VERSION="8.0",BACK_END=nginx,DISPLAY=on,XDEBUG=true --tag ghcr.io/deck-app/joomla4.0.6
-        with:
-          dockerfile: ./nginx/Dockerfile-8.0
+        run:  |
+          cd nginx
+          docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x --build-arg PHP_VERSION="8.0",BACK_END=nginx,DISPLAY=on,XDEBUG=true -f Dockerfile-8.0 --tag ghcr.io/deck-app/joomla4.0.6
       - name: Build Container image Backend nginx php 7.4
         run: docker buildx build --platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x --build-arg PHP_VERSION=7.4,BACK_END=nginx,DISPLAY=on,XDEBUG=true --tag ghcr.io/deck-app/joomla4.0.6 nginx/Dockerfile-7.4
       - name: Build Container image Backend apache php 8.0
