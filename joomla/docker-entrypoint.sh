@@ -2,6 +2,10 @@
 
 set -e
 
+HOST=`hostname`
+        NAME=`echo $HOST | sed 's:.*-::'`
+#        sed -i "s/{DB_HOSTNAME}/$NAME/g" /install.sh
+
 if [[ -f "$JOOMLA_DB_PASSWORD_FILE" ]]; then
         DB_PASSWORD=$(cat "$JOOMLA_DB_PASSWORD_FILE")
 fi
@@ -9,7 +13,7 @@ fi
 if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
         if [ -n "{MYSQL_PORT_3306_TCP}" ]; then
                 if [ -z "$JOOMLA_DB_HOST" ]; then
-                        JOOMLA_DB_HOST='{JOOMLA_DB_HOST}'
+                        JOOMLA_DB_HOST="mariadb-$NAME"
                 else
                         echo >&2 "warning: both JOOMLA_DB_HOST and MYSQL_PORT_3306_TCP found"
                         echo >&2 "  Connecting to JOOMLA_DB_HOST ({JOOMLA_DB_HOST})"
@@ -47,14 +51,21 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
                         ( set -x; ls -A; sleep 10 )
                 fi
 
-                tar cf - --one-file-system -C /usr/src/joomla . | tar xf -
+                tar cf - --one-file-system -C /usr/src/joomla . | tar xf - 2> /dev/null
 
                 if [ ! -e .htaccess ]; then
                         # NOTE: The "Indexes" option is disabled in the php:apache base image so remove it as we enable .htaccess
                         sed -r 's/^(Options -Indexes.*)$/#\1/' htaccess.txt > .htaccess
-                        chown -R nobody:nobody /var/www
-                        chown nginx:nginx .htaccess
-                        chmod -R 777 installation
+                        # if [[ {BACK_END} = nginx ]]  ;
+                        # then
+                        #     chown -R apache:apache /var/www
+                        #     chown apache:apache .htaccess
+                        #     chmod -R 777 installation
+                        # else
+                        #     chmod -R nobody:nobody /var/www
+                        #     chown nginx:nginx .htaccess
+                        #     chmod -R 777 installation
+                        # fi
                 fi
 
                 echo >&2 "Complete! Joomla has been successfully copied to $(pwd)"
@@ -73,8 +84,18 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
         echo >&2 "========================================================================"
 fi
 
-cp /app/default.conf /etc/nginx/conf.d/default.conf
 rm -rf /var/preview
-nginx -s reload
+if [[ {BACK_END} = nginx ]]  ; 
+then
+    cp /app/default.conf /etc/nginx/conf.d/default.conf
+    nginx -s reload
+    chown -R nobody:nobody /var/www 2> /dev/null
+else
+    cp /app/httpd.conf /etc/apache2/httpd.conf
+    httpd -k graceful
+    chown -R apache:apache /var/www 2> /dev/null
+fi
 
+rm -rf /var/preview
+rm -rf /app/default.conf
 exec "$@"

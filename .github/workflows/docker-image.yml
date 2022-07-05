@@ -1,4 +1,4 @@
-name: "Release"
+name: Docker Image CI
 
 on:
   push:
@@ -7,18 +7,18 @@ on:
     branches: [ master ]
 
 jobs:
-  Joomla:
+  Mautic:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build the image with php 8.0 nginx
+      - name: Build the image with php 8.0 and nginx
         run: docker-compose build
         env:
           PHP_VERSION: "8.0"
           BACK_END: nginx
           XDEBUG: true
           DISPLAY_PHPERROR: true
-      - name: Build the image with php 7.4 nginx
+      - name: Build the image with php 7.4 and nginx
         run: docker-compose build
         env:
           PHP_VERSION: "7.4"
@@ -27,7 +27,7 @@ jobs:
           DISPLAY_PHPERROR: true
       - name: Build the image with php 8.0 and apache
         run: docker-compose build
-        env:
+        env: 
           PHP_VERSION: "8.0"
           BACK_END: apache
           XDEBUG: true
@@ -39,4 +39,3 @@ jobs:
           BACK_END: apache
           XDEBUG: true
           DISPLAY_PHPERROR: true
-      
