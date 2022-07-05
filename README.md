@@ -25,16 +25,14 @@ Edit .env [Environment Variables](#environment-variables)  file to change any se
 From the DECK app, go to stack list and click on project's ` More > configure > Advanced configuration` Follow the instructions below and restart your stack from the GUI
 
 ### Edit Nginx configuration
-httpd.conf is located at `./nginx/default.conf`
+httpd.conf is located at `./joomla/default.conf`
 
-### Editing php.in
-PHP ini file is located at `./nginx/php_ini/php{YOUR.PHP.VERSION}.ini`
 
 ### Edit Apache configuration
-httpd.conf is located at `./apache/httpd.conf`
+httpd.conf is located at `./joomla/httpd.conf`
 
 ### Editing php.in
-PHP ini file is located at `./apache/php_ini/php{YOUR.PHP.VERSION}.ini`
+PHP ini file is located at `./joomla/php.ini`
 
 ### Installing / removing PHP extensions
 Add / remove PHP extensions from `./apache/Dockerfile-{YOUR.PHP.VERSION}`
